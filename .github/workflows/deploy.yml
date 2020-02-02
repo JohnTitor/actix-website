@@ -1,0 +1,28 @@
+name: Upload documentation
+
+on:
+  push:
+    branches:
+      - tweak-hugo
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.repository == 'JohnTitor/actix-website'
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.62.1'
+
+      - name: Build
+        run: hugo
+
+      - name: Upload site to actix/actix.github.io
+        run: |
+          cp CNAME public
+          git clone https://github.com/davisp/ghp-import.git
+          ./ghp-import/ghp_import.py -n -p -f -m "Documentation upload" -b master -r https://${{ secrets.DEPLOY_TOKEN }}@github.com/JohnTitor/actix.github.io.git public
